@@ -1,0 +1,133 @@
+import { {{serviceName}} } from '../services/{{servicePath}}';
+import { Controller, Req, Res, Post, Body } from '@nestjs/common';
+import { ApiOkResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { Request } from 'express';
+import { Result } from '../dto/Result';
+import { JsonBody } from '../dto/JsonBody';
+import Logger from '../Logger';
+
+const logger = Logger.getLogger('{{controllerName}}');
+
+@Controller('{{path}}')
+export class {{controllerName}} {
+    constructor(private readonly provider: {{serviceName}}) {}
+
+    @Post()
+    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            additionalProperties: true,
+            required: ['json'],
+            properties: {
+                session: {
+                    type: 'string',
+                },
+                json: {
+                    type: 'object',
+                    properties: {
+                        filter: {
+                            type: 'object',
+                            additionalProperties: true,
+                        },
+                        master: {
+                            type: 'object',
+                            additionalProperties: true,
+                        },
+                        service: {
+                            type: 'object',
+                            required: ['cv_action'],
+                            properties: {
+                                ck_main: {
+                                    type: 'string',
+                                },
+                                cv_action: {
+                                    type: 'string',
+                                }
+                            }
+                        },
+                        data: {
+                            type: 'object',
+                            additionalProperties: true,
+                        }
+                    }
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        schema: {
+            type: 'object',
+            anyOf: [
+                {
+                    type: 'object',
+                    required: ['ck_id'],
+                    properties: {
+                        ck_id: {
+                            type: 'string'
+                        },
+                        cv_error: {
+                            type: 'object',
+                            additionalProperties: true,
+                        }
+                    }
+                }, {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        additionalProperties: true,
+                        required: ['jn_total_cnt'],
+                        properties: {
+                            jn_total_cnt: {
+                                type: 'integer'
+                            }
+                        }
+                    },
+                }
+            ]
+        }
+    })
+    async post(
+        @Req() request: Request,
+        @Body('json') jsonStr: string): Promise<Result | Record<string, any>[]> {
+        let json: JsonBody = {};
+        try {
+            json = JSON.parse(jsonStr) as JsonBody;
+        } catch(e) {
+            logger.error(e);
+            return {
+                ['{{idproperty}}']: '',
+                cv_error: {
+                    504: [],
+                },
+            };
+        }
+        
+        if(json.filter) {
+            const [result, jn_total_cnt] = await this.provider.findAll(json, (request as any).user?.ck_id, request);
+
+            return result.map((res) => ({
+                ...res,
+                jn_total_cnt,
+            }));
+        }
+
+        if(json.service) {
+            switch(json.service.cv_action) {
+            case 'I':
+                return this.provider.add(json, (request as any).user?.ck_id, request);
+            case 'U':
+                return this.provider.update(json, (request as any).user?.ck_id, request);
+            case 'D':
+                return this.provider.delete(json, (request as any).user?.ck_id, request);
+            }
+        }
+
+        return {
+            ['{{idproperty}}']: '',
+            cv_error: {
+                504: [],
+            },
+        };
+    }
+}

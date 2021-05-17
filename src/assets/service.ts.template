@@ -1,0 +1,39 @@
+import { Injectable } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { Result } from '../dto/Result';
+import { JsonBody } from '../dto/JsonBody';
+import { Connection } from 'typeorm';
+import { {{modelName}} } from '../entities/{{modelPath}}';
+
+@Injectable()
+export class {{serviceName}} {
+    constructor(private connection: Connection) {}
+    
+    async findAll(json: JsonBody, user = '999999', req: Request): Promise<[{{modelName}}[], number]> {
+        return this.connection.getRepository({{modelName}}).findAndCount({
+            where: json.filter['{{idproperty}}'] ? {['{{idproperty}}']: json.filter['{{idproperty}}']} : undefined,
+            take: parseInt(json.filter.jn_fetch || 2000, 10),
+            skip: parseInt(json.filter.jn_offset || 0, 10),
+        });
+    }
+    async add(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        const result = await this.connection.getRepository({{modelName}}).save(json.data as {{modelName}});
+        return {
+            ['{{idproperty}}']: result['{{idproperty}}']
+        }
+    }
+
+    async update(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        const result = await this.connection.getRepository({{modelName}}).save(json.data as {{modelName}});
+        return {
+            ['{{idproperty}}']: result['{{idproperty}}'],
+        }
+    }
+
+    async delete(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        await this.connection.getRepository({{modelName}}).delete(json.data['{{idproperty}}']);
+        return {
+            ['{{idproperty}}']: json.data['{{idproperty}}'],
+        }
+    }
+}

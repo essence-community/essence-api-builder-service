@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <include file="Provider_essence-api-builder.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGenerate.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetApiField.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetApiInfo.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetApiPath.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetApiView.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetObject.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetPage.sql" relativeToChangelogFile="true"/>
+    <include file="EssenceApiBuilderGetPageObject.sql" relativeToChangelogFile="true"/>
+</databaseChangeLog>
