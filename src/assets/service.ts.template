@@ -4,14 +4,20 @@ import { Result } from '../dto/Result';
 import { JsonBody } from '../dto/JsonBody';
 import { Connection } from 'typeorm';
 import { {{modelName}} } from '../entities/{{modelPath}}';
+import { filterEntity, sortEntity, filterEqualsEntity } from '../utils/FilterAndSort';
 
 @Injectable()
 export class {{serviceName}} {
     constructor(private connection: Connection) {}
     
     async findAll(json: JsonBody, user = '999999', req: Request): Promise<[{{modelName}}[], number]> {
-        return this.connection.getRepository({{modelName}}).findAndCount({
-            where: json.filter['{{idproperty}}'] ? {['{{idproperty}}']: json.filter['{{idproperty}}']} : undefined,
+        const rep = this.connection.getRepository({{modelName}});
+        return rep.findAndCount({
+            where: {
+                ...filterEqualsEntity(rep.metadata, json.filter),
+                ...filterEntity(rep.metadata, json.filter.jl_filter)
+            },
+            order: sortEntity(rep.metadata, json.filter.jl_sort),
             take: parseInt(json.filter.jn_fetch || 2000, 10),
             skip: parseInt(json.filter.jn_offset || 0, 10),
         });

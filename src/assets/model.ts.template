@@ -1,9 +1,10 @@
 import {Column, Entity, PrimaryColumn} from 'typeorm';
+import { Audit } from '../dao/Audit';
 
 @Entity('{{table}}'{{#if schema}}, {
     schema: '{{schema}}'
 }{{/if}})
-export class {{modelName}} {
+export class {{modelName}} extends Audit {
     @PrimaryColumn({
         name: '{{idproperty}}',
     })
