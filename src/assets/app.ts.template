@@ -9,8 +9,8 @@ export async function bootstrap() {
 
     const config = new DocumentBuilder()
         .setTitle('{{name}}')
-        {{#if description}}.setDescription('{{description}}')
-        {{/if}}.setVersion('1.0')
+        {{#if description}}.setDescription('{{description}}'){{else}}.setDescription('{{info.description}}')
+        {{/if}}.setVersion('{{#if info.version}}{{info.version}}{{else}}1.0{{/if}}')
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('apiDoc', app, document);

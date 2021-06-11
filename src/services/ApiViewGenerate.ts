@@ -63,6 +63,8 @@ export class ApiViewGenerate {
             const paths = pathObj.path.split('/').filter((val) => !isEmpty(val));
             const name = capitalizeFirstLetter(paths[paths.length-1]);
             const parent = paths.slice(0, paths.length - 1);
+            pathObj.parentPath =  path.join(...parent);
+            pathObj.levelPath = path.join('..', ...(parent.map(()=>'..')));
             pathObj.serviceName = `${name}Service`;
             pathObj.servicePath = path.join(...parent, pathObj.serviceName);
             pathObj.modelName = `${name}Model`;
@@ -76,7 +78,7 @@ export class ApiViewGenerate {
                 pathObj.modelField = pathObj.master.reduce((res, val) => {
                     res.push({
                         column: val.out,
-                        columnOrigin: val.in,
+                        columnOrigin: val.out,
                         required: true,
                         dataType: 'string', 
                     })
@@ -96,7 +98,7 @@ export class ApiViewGenerate {
             }
             pathObj.modelField = pathObj.modelField.reduce((acc, obj)=>{
                 const exist = acc.find(({column}) => obj.column === column);
-                if(!exist){
+                if(!exist && obj.column){
                     acc.push(obj);
                 }
                 return acc;
@@ -115,9 +117,9 @@ export class ApiViewGenerate {
             fs.writeFileSync(path.join(temp, 'src', 'services', pathObj.servicePath+'.ts'), tempService(pathObj));
             fs.writeFileSync(path.join(temp, 'src', 'entities', pathObj.modelPath+'.ts'), tempModel(pathObj));
             fs.writeFileSync(path.join(temp, 'src', 'controllers', pathObj.controllerPath+'.ts'), tempController(pathObj));
-            fs.appendFileSync(path.join(temp, 'src', 'controllers', 'index.ts'), `export * from './${pathObj.controllerPath}'`);
-            fs.appendFileSync(path.join(temp, 'src', 'entities', 'index.ts'), `export * from './${pathObj.modelPath}'`);
-            fs.appendFileSync(path.join(temp, 'src', 'services', 'index.ts'), `export * from './${pathObj.servicePath}'`);
+            fs.appendFileSync(path.join(temp, 'src', 'controllers', 'index.ts'), `export * from './${pathObj.controllerPath}';\n`);
+            fs.appendFileSync(path.join(temp, 'src', 'entities', 'index.ts'), `export * from './${pathObj.modelPath}';\n`);
+            fs.appendFileSync(path.join(temp, 'src', 'services', 'index.ts'), `export * from './${pathObj.servicePath}';\n`);
         }));
         const result = new AdmZip();
         result.addLocalFolder(temp);
@@ -177,33 +179,40 @@ export class ApiViewGenerate {
                 this.parsePanel(childBc, pathObj);
             });
         }
-        pathObj.modelField = bc.columns
-            .filter((columnBc) => ['checkbox', 'icon', 'detail'].indexOf(columnBc.datatype) === -1 && columnBc.column)
-            .reduce((res, columnBc) => {
-                if (columnBc.editors && columnBc.editors !== 'false') {
-                    return [...res, ...this.parseFormField({
-                        ...(columnBc.editors[0]),
+        if (bc.filters) {
+            bc.filters.forEach((childBc) => {
+                this.parsePanel(childBc, pathObj);
+            });
+        }
+        if (bc.columns) {
+            pathObj.modelField = bc.columns
+                .filter((columnBc) => ['checkbox', 'icon', 'detail'].indexOf(columnBc.datatype) === -1 && columnBc.column)
+                .reduce((res, columnBc) => {
+                    if (columnBc.editors && columnBc.editors !== 'false') {
+                        return [...res, ...this.parseFormField({
+                            ...(columnBc.editors[0]),
+                            column: columnBc.column,
+                            required: columnBc.required || columnBc.editors[0].required,
+                        })];
+                    }
+                    res.push({
                         column: columnBc.column,
-                        required: columnBc.required || columnBc.editors[0].required,
-                    })];
-                }
-                res.push({
-                    column: columnBc.column,
-                    columnOrigin: columnBc.column,
-                    required: columnBc.required,
-                    dataType: this.checkDataType(columnBc.datatype)
-                });
-                return res
-            }, pathObj.modelField || []);
+                        columnOrigin: columnBc.column,
+                        required: columnBc.required,
+                        dataType: this.checkDataType(columnBc.datatype)
+                    });
+                    return res
+                }, pathObj.modelField || []);
+        }
     }
 
     parseField(bc: IBuilderConfig, pathObj) {
-        pathObj.modelField = bc.valuefield.map((field) => ({
+        pathObj.modelField = bc.valuefield?.map((field) => ({
             column: field.in,
             columnOrigin: field.in,
             required: false,
             dataType: this.checkDataType(bc.datatype),
-        }));
+        })) || pathObj.modelField;
         if (bc.displayfield && pathObj.modelField.filter((field) => field.column === bc.displayfield).length === 0) {
             pathObj.modelField.push({
                 column: bc.displayfield,
@@ -229,11 +238,13 @@ export class ApiViewGenerate {
     }
 
     parsePanel(bc: IBuilderConfig, pathObj) {
-        pathObj.modelField = bc.childs.filter((bcChild) => bcChild.type === 'IFIELD' || bcChild.type === 'FORM_NESTED').reduce((res, val) => {
-            return res.concat(this.parseFormField(val));
-        }, pathObj.modelField || []);
-        bc.childs
-            .filter((bcChild) => bcChild.type === 'BOX' || bcChild.type === 'PANEL' || bcChild.type === 'FORMPANEL')
-            .forEach((bcChild) => this.parsePanel(bcChild, pathObj));
+        if (bc.childs) {
+            pathObj.modelField = bc.childs.filter((bcChild) => bcChild.type === 'IFIELD' || bcChild.type === 'FORM_NESTED').reduce((res, val) => {
+                return res.concat(this.parseFormField(val));
+            }, pathObj.modelField || []);
+            bc.childs
+                .filter((bcChild) => bcChild.type === 'BOX' || bcChild.type === 'PANEL' || bcChild.type === 'FORMPANEL')
+                .forEach((bcChild) => this.parsePanel(bcChild, pathObj));
+        }
     }
 }

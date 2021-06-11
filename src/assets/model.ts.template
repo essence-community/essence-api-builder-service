@@ -1,11 +1,11 @@
-import {Column, Entity, PrimaryColumn} from 'typeorm';
-import { Audit } from '../dao/Audit';
+import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import { Audit } from '{{levelPath}}/dao/Audit';
 
 @Entity('{{table}}'{{#if schema}}, {
     schema: '{{schema}}'
 }{{/if}})
 export class {{modelName}} extends Audit {
-    @PrimaryColumn({
+    @PrimaryGeneratedColumn('uuid', {
         name: '{{idproperty}}',
     })
     ['{{idproperty}}']: string;

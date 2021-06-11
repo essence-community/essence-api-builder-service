@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Result } from '../dto/Result';
-import { JsonBody } from '../dto/JsonBody';
+import { Request } from 'express';
+import { Result } from '{{levelPath}}/dto/Result';
+import { JsonBody } from '{{levelPath}}/dto/JsonBody';
 import { Connection } from 'typeorm';
-import { {{modelName}} } from '../entities/{{modelPath}}';
-import { filterEntity, sortEntity, filterEqualsEntity } from '../utils/FilterAndSort';
+import { {{modelName}} } from '{{levelPath}}/entities/{{modelPath}}';
+import { filterEntity, sortEntity, filterEqualsEntity } from '{{levelPath}}/utils/FilterAndSort';
 
 @Injectable()
 export class {{serviceName}} {
@@ -12,9 +12,14 @@ export class {{serviceName}} {
     
     async findAll(json: JsonBody, user = '999999', req: Request): Promise<[{{modelName}}[], number]> {
         const rep = this.connection.getRepository({{modelName}});
+        const filter = json.filter;
+        {{#each master}}
+        filter['{{out}}'] = json.master['{{in}}'];
+        {{/each}}
+        
         return rep.findAndCount({
             where: {
-                ...filterEqualsEntity(rep.metadata, json.filter),
+                ...filterEqualsEntity(rep.metadata, filter),
                 ...filterEntity(rep.metadata, json.filter.jl_filter)
             },
             order: sortEntity(rep.metadata, json.filter.jl_sort),
@@ -23,14 +28,26 @@ export class {{serviceName}} {
         });
     }
     async add(json: JsonBody, user = '999999', req: Request): Promise<Result> {
-        const result = await this.connection.getRepository({{modelName}}).save(json.data as {{modelName}});
+        const data: {{modelName}} = json.data as {{modelName}};
+        {{#each master}}
+        data['{{out}}'] = json.master['{{in}}'];
+        {{/each}}
+        data.ck_user = user;
+        const result = await this.connection.getRepository({{modelName}}).save(data);
+        
         return {
             ['{{idproperty}}']: result['{{idproperty}}']
         }
     }
 
     async update(json: JsonBody, user = '999999', req: Request): Promise<Result> {
-        const result = await this.connection.getRepository({{modelName}}).save(json.data as {{modelName}});
+        const data: {{modelName}} = json.data as {{modelName}};
+        {{#each master}}
+        data['{{out}}'] = json.master['{{in}}'];
+        {{/each}}
+        data.ck_user = user;
+        const result = await this.connection.getRepository({{modelName}}).update(data['{{idproperty}}'], data);
+        
         return {
             ['{{idproperty}}']: result['{{idproperty}}'],
         }
@@ -38,6 +55,7 @@ export class {{serviceName}} {
 
     async delete(json: JsonBody, user = '999999', req: Request): Promise<Result> {
         await this.connection.getRepository({{modelName}}).delete(json.data['{{idproperty}}']);
+        
         return {
             ['{{idproperty}}']: json.data['{{idproperty}}'],
         }

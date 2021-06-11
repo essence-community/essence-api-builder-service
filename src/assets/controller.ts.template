@@ -1,18 +1,22 @@
-import { {{serviceName}} } from '../services/{{servicePath}}';
-import { Controller, Req, Res, Post, Body } from '@nestjs/common';
+import { Controller, Req, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiOkResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { classToPlain, plainToClass } from 'class-transformer';
 import { Request } from 'express';
-import { Result } from '../dto/Result';
-import { JsonBody } from '../dto/JsonBody';
-import Logger from '../Logger';
+import { Result } from '{{levelPath}}/dto/Result';
+import { JsonBody } from '{{levelPath}}/dto/JsonBody';
+import { {{serviceName}} } from '{{levelPath}}/services/{{servicePath}}';
+import { AuditService } from '{{levelPath}}/services/AuditService';
+
+import Logger from '{{levelPath}}/Logger';
 
 const logger = Logger.getLogger('{{controllerName}}');
 
 @Controller('{{path}}')
 export class {{controllerName}} {
-    constructor(private readonly provider: {{serviceName}}) {}
+    constructor(private readonly provider: {{serviceName}}, private readonly audit: AuditService) {}
 
     @Post()
+    @HttpCode(200)
     @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
         schema: {
@@ -92,7 +96,7 @@ export class {{controllerName}} {
         @Body('json') jsonStr: string): Promise<Result | Record<string, any>[]> {
         let json: JsonBody = {};
         try {
-            json = JSON.parse(jsonStr) as JsonBody;
+            json = plainToClass(JsonBody, JSON.parse(jsonStr)) as JsonBody;
         } catch(e) {
             logger.error(e);
             return {
@@ -107,19 +111,43 @@ export class {{controllerName}} {
             const [result, jn_total_cnt] = await this.provider.findAll(json, (request as any).user?.ck_id, request);
 
             return result.map((res) => ({
-                ...res,
+                ...(classToPlain(res)),
                 jn_total_cnt,
             }));
         }
 
         if(json.service) {
-            switch(json.service.cv_action) {
-            case 'I':
-                return this.provider.add(json, (request as any).user?.ck_id, request);
-            case 'U':
-                return this.provider.update(json, (request as any).user?.ck_id, request);
-            case 'D':
-                return this.provider.delete(json, (request as any).user?.ck_id, request);
+            let res = null;
+            try {
+                switch(json.service.cv_action) {
+                case 'I':
+                    res = await this.provider.add(json, (request as any).user?.ck_id, request);
+                    break;
+                case 'U':
+                    res = await this.provider.update(json, (request as any).user?.ck_id, request);
+                    break;
+                case 'D':
+                    res = await this.provider.delete(json, (request as any).user?.ck_id, request);
+                    break;
+                }
+                this.audit.log({
+                    cc_json: jsonStr,
+                    cv_session: request.query?.session || request.params?.session || request.body?.session,
+                    cv_method: '{{path}}',
+                    cv_id: json.data['{{idproperty}}'],
+                    ck_user: (request as any).user?.ck_id || '999999',
+                } as any);
+                return res;
+            } catch (e) {
+                this.audit.log({
+                    cc_json: jsonStr,
+                    cv_session: request.query?.session || request.params?.session || request.body?.session,
+                    cv_method: '{{path}}',
+                    cv_error: e.message,
+                    cv_id: json.data['{{idproperty}}'],
+                    ck_user: (request as any).user?.ck_id || '999999',
+                } as any);
+                throw e;
             }
         }
 

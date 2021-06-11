@@ -1,8 +1,8 @@
 {
   "name": "{{name}}",
-  "version": "0.0.1",
-  "description": "{{description}}",
-  "author": "Custom",
+  "version": "{{#if info.version}}{{info.version}}{{else}}1.0{{/if}}",
+  "description": "{{description}}{{#if info.description}}{{info.description}}{{/if}}",
+  "author": "{{field.contactName}} ({{field.contactEmail}})",
   "private": true,
   "license": "MIT",
   "scripts": {
