@@ -129,6 +129,13 @@ export class {{controllerName}} {
                 case 'D':
                     res = await this.provider.delete(json, (request as any).user?.ck_id, request);
                     break;
+                default:
+                    return {
+                        ['{{idproperty}}']: '',
+                        cv_error: {
+                            504: [],
+                        },
+                    };
                 }
                 this.audit.log({
                     cc_json: jsonStr,
