@@ -28,9 +28,10 @@ export class ApiViewField {
     async update(obj: any, user = '999999'): Promise<Result> {
         obj.user = user;
         obj.apiView = await this.connection.getRepository(ApiView).findOne(obj.idApiView);
-        const res = await this.connection.getRepository(ApiField).save(obj as ApiField);
+        await this.connection.getRepository(ApiField).findOneOrFail(obj.id);
+        await this.connection.getRepository(ApiField).save(obj as ApiField);
         return {
-            id: res.id
+            id: obj.id
         }
     }
 

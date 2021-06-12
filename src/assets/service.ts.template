@@ -4,7 +4,7 @@ import { Result } from '{{levelPath}}/dto/Result';
 import { JsonBody } from '{{levelPath}}/dto/JsonBody';
 import { Connection } from 'typeorm';
 import { {{modelName}} } from '{{levelPath}}/entities/{{modelPath}}';
-import { filterEntity, sortEntity, filterEqualsEntity } from '{{levelPath}}/utils/FilterAndSort';
+import { filterEntity, sortEntity, filterEqualsEntity, plainToEntity } from '{{levelPath}}/utils/FilterAndSort';
 
 @Injectable()
 export class {{serviceName}} {
@@ -28,12 +28,13 @@ export class {{serviceName}} {
         });
     }
     async add(json: JsonBody, user = '999999', req: Request): Promise<Result> {
-        const data: {{modelName}} = json.data as {{modelName}};
+        const rep = this.connection.getRepository({{modelName}});
+        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         {{#each master}}
         data['{{out}}'] = json.master['{{in}}'];
         {{/each}}
         data.ck_user = user;
-        const result = await this.connection.getRepository({{modelName}}).save(data);
+        const result = await rep.save(data);
         
         return {
             ['{{idproperty}}']: result['{{idproperty}}']
@@ -41,15 +42,16 @@ export class {{serviceName}} {
     }
 
     async update(json: JsonBody, user = '999999', req: Request): Promise<Result> {
-        const data: {{modelName}} = json.data as {{modelName}};
+        const rep = this.connection.getRepository({{modelName}});
+        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         {{#each master}}
         data['{{out}}'] = json.master['{{in}}'];
         {{/each}}
         data.ck_user = user;
-        const result = await this.connection.getRepository({{modelName}}).update(data['{{idproperty}}'], data);
-        
+        await rep.findOneOrFail(data['{{idproperty}}']);
+        const res = await rep.save(data);
         return {
-            ['{{idproperty}}']: result['{{idproperty}}'],
+            ['{{idproperty}}']: res['{{idproperty}}'],
         }
     }
 

@@ -30,10 +30,10 @@ export class ApiViewPath {
     async update(obj: any, user = '999999'): Promise<Result> {
         obj.user = user;
         obj.apiView = await this.connection.getRepository(ApiView).findOne(obj.idApiView);
-
-        const res = await this.connection.getRepository(ApiPath).save(obj as ApiPath);
+        await this.connection.getRepository(ApiPath).findOneOrFail(obj.id);
+        await this.connection.getRepository(ApiPath).save(obj as ApiPath);
         return {
-            id: res.id
+            id: obj.id
         }
     }
 

@@ -24,9 +24,10 @@ export class ApiViewService {
 
     async update(obj: any, user = '999999'): Promise<Result> {
         obj.user = user;
-        const res = await this.connection.getRepository(ApiView).save(obj as ApiView);
+        await this.connection.getRepository(ApiView).findOneOrFail(obj.id);
+        await this.connection.getRepository(ApiView).save(obj as ApiView);
         return {
-            id: res.id
+            id: obj.id
         }
     }
 
