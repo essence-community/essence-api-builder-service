@@ -150,7 +150,7 @@ export class {{controllerName}} {
                     cc_json: jsonStr,
                     cv_session: request.query?.session || request.params?.session || request.body?.session,
                     cv_method: '{{path}}',
-                    cv_error: e.message,
+                    cv_error: `${e.message}\n${e.stack}`,
                     cv_id: json.data['{{idproperty}}'],
                     ck_user: (request as any).user?.ck_id || '999999',
                 } as any);

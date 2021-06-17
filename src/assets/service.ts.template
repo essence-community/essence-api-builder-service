@@ -29,10 +29,10 @@ export class {{serviceName}} {
     }
     async add(json: JsonBody, user = '999999', req: Request): Promise<Result> {
         const rep = this.connection.getRepository({{modelName}});
-        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         {{#each master}}
-        data['{{out}}'] = json.master['{{in}}'];
+        json.data['{{out}}'] = json.master['{{in}}'];
         {{/each}}
+        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         data.ck_user = user;
         const result = await rep.save(data);
         
@@ -43,10 +43,10 @@ export class {{serviceName}} {
 
     async update(json: JsonBody, user = '999999', req: Request): Promise<Result> {
         const rep = this.connection.getRepository({{modelName}});
-        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         {{#each master}}
-        data['{{out}}'] = json.master['{{in}}'];
+        json.data['{{out}}'] = json.master['{{in}}'];
         {{/each}}
+        const data: {{modelName}} = plainToEntity(rep.metadata, json.data) as {{modelName}};
         data.ck_user = user;
         await rep.findOneOrFail(data['{{idproperty}}']);
         const res = await rep.save(data);
