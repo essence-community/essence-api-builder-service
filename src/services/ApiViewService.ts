@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Result } from '../dto/Result';
 import { Connection } from 'typeorm';
 import { ApiView } from '../entities/ApiView';
+import { ApiField } from '../entities/ApiField';
+import { ApiInfo } from '../entities/ApiInfo';
+import { ApiPath } from '../entities/ApiPath';
 
 @Injectable()
 export class ApiViewService {
@@ -32,6 +35,21 @@ export class ApiViewService {
     }
 
     async delete(id: string): Promise<Result> {
+        await this.connection.getRepository(ApiField).delete({
+            apiView: {
+                id
+            }
+        });
+        await this.connection.getRepository(ApiInfo).delete({
+            apiView: {
+                id
+            }
+        });
+        await this.connection.getRepository(ApiPath).delete({
+            apiView: {
+                id
+            }
+        });
         await this.connection.getRepository(ApiView).delete(id);
         return {
             id
