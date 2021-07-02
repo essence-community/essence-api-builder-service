@@ -117,7 +117,7 @@ export class {{controllerName}} {
         }
 
         if(json.service) {
-            let res = null;
+            let res = {};
             try {
                 switch(json.service.cv_action) {
                 case 'I':
@@ -141,7 +141,7 @@ export class {{controllerName}} {
                     cc_json: jsonStr,
                     cv_session: request.query?.session || request.params?.session || request.body?.session,
                     cv_method: '{{path}}',
-                    cv_id: json.data['{{idproperty}}'],
+                    cv_id: res['{{idproperty}}'] || json.data['{{idproperty}}'],
                     ck_user: (request as any).user?.ck_id || '999999',
                 } as any);
                 return res;

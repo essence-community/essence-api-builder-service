@@ -98,7 +98,7 @@ export class ApiViewGenerate {
             }
             pathObj.modelField = pathObj.modelField.reduce((acc, obj)=>{
                 const exist = acc.find(({column}) => obj.column === column);
-                if(!exist && obj.column){
+                if(!exist && obj.column && obj.column !== pathObj.idproperty){
                     acc.push(obj);
                 }
                 return acc;
