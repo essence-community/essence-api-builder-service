@@ -130,7 +130,7 @@ export class {{controllerName}} {
                     res = await this.provider.delete(json, (request as any).user?.ck_id, request);
                     break;
                 default:
-                    return {
+                    res = {
                         ['{{idproperty}}']: '',
                         cv_error: {
                             504: [],
@@ -141,7 +141,8 @@ export class {{controllerName}} {
                     cc_json: jsonStr,
                     cv_session: request.query?.session || request.params?.session || request.body?.session,
                     cv_method: '{{path}}',
-                    cv_id: res['{{idproperty}}'] || json.data['{{idproperty}}'],
+                    cv_action: json.service.cv_action,
+                    cv_id: res?.['{{idproperty}}'] || json.data['{{idproperty}}'],
                     ck_user: (request as any).user?.ck_id || '999999',
                 } as any);
                 return res;
@@ -150,8 +151,9 @@ export class {{controllerName}} {
                     cc_json: jsonStr,
                     cv_session: request.query?.session || request.params?.session || request.body?.session,
                     cv_method: '{{path}}',
+                    cv_action: json.service.cv_action,
                     cv_error: `${e.message}\n${e.stack}`,
-                    cv_id: json.data['{{idproperty}}'],
+                    cv_id: res?.['{{idproperty}}'] || json.data['{{idproperty}}'],
                     ck_user: (request as any).user?.ck_id || '999999',
                 } as any);
                 throw e;
