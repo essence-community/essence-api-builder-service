@@ -28,6 +28,7 @@ export class {{serviceName}} {
         });
     }
     async add(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        const result = new Result();
         const rep = this.connection.getRepository({{modelName}});
         {{#each master}}
         json.data['{{out}}'] = json.master['{{in}}'];
@@ -36,12 +37,11 @@ export class {{serviceName}} {
         data.ck_user = user;
         const result = await rep.save(data);
         
-        return {
-            ['{{idproperty}}']: result['{{idproperty}}']
-        }
+        return result.setId(result['{{idproperty}}'],'{{idproperty}}');
     }
 
     async update(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        const result = new Result();
         const rep = this.connection.getRepository({{modelName}});
         {{#each master}}
         json.data['{{out}}'] = json.master['{{in}}'];
@@ -50,16 +50,13 @@ export class {{serviceName}} {
         data.ck_user = user;
         await rep.findOneOrFail(data['{{idproperty}}']);
         const res = await rep.save(data);
-        return {
-            ['{{idproperty}}']: res['{{idproperty}}'],
-        }
+        return result.setId(res['{{idproperty}}'],'{{idproperty}}');
     }
 
     async delete(json: JsonBody, user = '999999', req: Request): Promise<Result> {
+        const result = new Result();
         await this.connection.getRepository({{modelName}}).delete(json.data['{{idproperty}}']);
         
-        return {
-            ['{{idproperty}}']: json.data['{{idproperty}}'],
-        }
+        return result.setId(json.data['{{idproperty}}'],'{{idproperty}}');
     }
 }
