@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { EssenceCoreAuth } from './modules/EssenceCoreAuth';
 import { AppLogger } from './services/AppLogger';
+import './Constant';
 export async function bootstrap() {
     const app = await NestFactory.create(AppModule, { cors: true, logger: new AppLogger() });
 

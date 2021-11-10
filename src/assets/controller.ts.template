@@ -127,6 +127,7 @@ export class {{controllerName}} {
                     break;
                 default:
                     result.setId('', '{{idproperty}}').setError(504);
+                    break;
                 }
                 this.audit.log({
                     cc_json: jsonStr,
