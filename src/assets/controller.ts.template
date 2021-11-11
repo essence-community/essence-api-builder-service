@@ -62,12 +62,12 @@ export class {{controllerName}} {
     @ApiOkResponse({
         schema: {
             type: 'object',
-            anyOf: [
+            oneOf: [
                 {
                     type: 'object',
-                    required: ['ck_id'],
+                    required: ['{{idproperty}}'],
                     properties: {
-                        ck_id: {
+                        {{idproperty}}: {
                             type: 'string'
                         },
                         cv_error: {
