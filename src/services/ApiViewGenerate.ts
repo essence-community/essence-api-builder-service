@@ -14,7 +14,7 @@ import * as uuid from 'uuid';
 import { capitalizeFirstLetter, isEmpty, deleteFolderRecursive } from '../utils/Base';
 import { getCoreData } from '../utils/CallerEssenceCore';
 import { IBuilderConfig } from '../types/Builder';
-import cpy from 'cpy';
+import * as cpy from 'cpy';
 
 Helper({
     handlebars: Handlebars,
@@ -53,9 +53,10 @@ export class ApiViewGenerate {
     }
 
     async generateZip(temp: string,  data) {
-        cpy('**/*', temp, {
+        await cpy('**/*', temp, {
             cwd: files.appDir,
             parents: true,
+            dot: true,
         })
         fs.writeFileSync(path.join(temp, 'src', 'app.ts'), Handlebars.compile(fs.readFileSync(files.app).toString())(data));
         fs.writeFileSync(path.join(temp, 'package.json'), Handlebars.compile(fs.readFileSync(files.package).toString())(data));
