@@ -14,6 +14,7 @@ import * as uuid from 'uuid';
 import { capitalizeFirstLetter, isEmpty, deleteFolderRecursive } from '../utils/Base';
 import { getCoreData } from '../utils/CallerEssenceCore';
 import { IBuilderConfig } from '../types/Builder';
+import cpy from 'cpy';
 
 Helper({
     handlebars: Handlebars,
@@ -21,7 +22,7 @@ Helper({
 
 const asset = path.resolve(__dirname, '..', 'assets');
 const files = {
-    zipOrigin: path.join(asset, 'app.zip'),
+    appDir: path.join(asset, 'app'),
     app: path.join(asset, 'app.ts.template'),
     controller: path.join(asset, 'controller.ts.template'),
     model: path.join(asset, 'model.ts.template'),
@@ -52,8 +53,10 @@ export class ApiViewGenerate {
     }
 
     async generateZip(temp: string,  data) {
-        const zipOrigin = new AdmZip(files.zipOrigin);
-        zipOrigin.extractAllTo(temp);
+        cpy('**/*', temp, {
+            cwd: files.appDir,
+            parents: true,
+        })
         fs.writeFileSync(path.join(temp, 'src', 'app.ts'), Handlebars.compile(fs.readFileSync(files.app).toString())(data));
         fs.writeFileSync(path.join(temp, 'package.json'), Handlebars.compile(fs.readFileSync(files.package).toString())(data));
         const tempController = Handlebars.compile(fs.readFileSync(files.controller).toString());

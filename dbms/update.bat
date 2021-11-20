@@ -1,2 +1,2 @@
 cd %~dp0
-call liquibase\liquibase --defaultsFile=liquibase.properties --changeLogFile=db.changelog.xml update >> main.log
+mvn org.liquibase:liquibase-maven-plugin:update -Denv=meta
