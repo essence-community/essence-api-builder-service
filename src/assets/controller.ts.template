@@ -73,6 +73,22 @@ export class {{controllerName}} {
                         cv_error: {
                             type: 'object',
                             additionalProperties: true,
+                        },
+                        jt_form_message: {
+                            type: 'object',
+                            additionalProperties: true,
+                        },
+                        jt_return_form_data: {
+                            type: 'object',
+                            additionalProperties: true,
+                        },
+                        jt_return_form_break: {
+                            type: 'object',
+                            additionalProperties: true,
+                        },
+                        jt_message: {
+                            type: 'object',
+                            additionalProperties: true,
                         }
                     }
                 }, {
@@ -101,7 +117,7 @@ export class {{controllerName}} {
             json = plainToClass(JsonBody, JSON.parse(jsonStr)) as JsonBody;
         } catch(e) {
             logger.error(e);
-            return classToPlain(result.setId('', '{{idproperty}}').setError(504)) as Result;
+            return classToPlain(result.setId('', '{{idproperty}}').setError(c30703e742994f96887166f1468e976a)) as Result;
         }
         
         if(json.filter) {
@@ -126,7 +142,7 @@ export class {{controllerName}} {
                     result = await this.provider.delete(json, (request as any).user?.ck_id, request);
                     break;
                 default:
-                    result.setId('', '{{idproperty}}').setError(504);
+                    result.setId('', '{{idproperty}}').setError(c30703e742994f96887166f1468e976a);
                     break;
                 }
                 this.audit.log({
@@ -152,6 +168,6 @@ export class {{controllerName}} {
             }
         }
 
-        return classToPlain(result.setId('', '{{idproperty}}').setError(504)) as Result;
+        return classToPlain(result.setId('', '{{idproperty}}').setError(c30703e742994f96887166f1468e976a)) as Result;
     }
 }
