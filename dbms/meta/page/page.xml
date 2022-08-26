@@ -1,4 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <include file="Page_24702AC447DB4E8982427340FC67920E.sql" relativeToChangelogFile="true"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+        <include file="Page_FF7C023ADAD940A397E46F3BBD4A5AD6.sql" relativeToChangelogFile="true" />
+        <include file="Page_9ABF06A8902D4A1AAF56A97F9DC6A325.sql" relativeToChangelogFile="true" />
+        <include file="Page_24702AC447DB4E8982427340FC67920E.sql" relativeToChangelogFile="true" />
+
 </databaseChangeLog>
